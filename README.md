@@ -1,29 +1,25 @@
-# Omarchy Finance Watchlist
+# Omarchy Finance
 
-A Quattro top-bar plugin for monitoring stocks, shares and cryptocurrency.
+A Quattro-native top-bar finance watchlist for stocks, shares and cryptocurrency.
 
-Default watchlist:
+## v0.2.0
 
-- Apple (`AAPL`)
-- Tesla (`TSLA`)
-- Bitcoin (`BTC-USD`)
+Finance v0.2.0 is a major UI and data-layer rebuild:
 
-## Features
+- polished market-card watchlist
+- mini sparklines for every asset
+- click any asset for a full detail view
+- 1D / 5D / 1M / 3M / 1Y chart ranges
+- range high, range low, previous close and provider
+- popular-asset picker for stocks and crypto
+- custom ticker entry for anything not in the picker
+- rotating top-bar price/change summary
+- existing v0.1 watchlists are migrated automatically
+- stock quotes/charts prefer Nasdaq public web endpoints
+- crypto quotes/charts prefer CoinGecko
+- Yahoo Finance and Stooq remain quote/history fallbacks where applicable
 
-- Native Omarchy `bar-widget` with anchored popup panel.
-- Rotating top-bar summary such as `AAPL +0.8%`.
-- Current price, daily absolute change and percentage change.
-- Stocks and crypto in the same watchlist.
-- Add/remove symbols from the panel.
-- Supports non-US Yahoo-style symbols such as London `.L` tickers.
-- Cached quotes to avoid unnecessary requests.
-- Middle-click the bar widget to force a refresh.
-
-## Data source
-
-v0.1.1 uses Yahoo Finance's undocumented `v8/finance/chart` JSON endpoint. It does not require an API key, which keeps local installation simple, but it is not an official supported API and can change or become unavailable. Data may also be delayed.
-
-This plugin is intended for personal monitoring only, not order execution or investment decisions.
+The default watchlist contains Apple (`AAPL`), Tesla (`TSLA`) and Bitcoin (`BTC-USD`).
 
 ## Files
 
@@ -31,74 +27,57 @@ This plugin is intended for personal monitoring only, not order execution or inv
 manifest.json
 BarWidget.qml
 Panel.qml
+Sparkline.qml
 backend.sh
 self-test.sh
-README.md
-LICENSE
 ```
 
-User settings are stored outside the plugin checkout:
+User data lives outside the plugin folder:
 
 ```text
 ~/.config/omarchy/finance/watchlist.json
+~/.cache/omarchy-finance/
 ```
 
-Cached prices are stored under:
-
-```text
-~/.cache/omarchy-finance/quotes.json
-```
-
-This means Git/plugin updates do not overwrite your watchlist.
+Plugin updates therefore do not overwrite the watchlist.
 
 ## Validate
-
-On your Omarchy machine:
 
 ```bash
 ./self-test.sh
 omarchy plugin validate .
-qmllint -I "$OMARCHY_PATH/shell" BarWidget.qml Panel.qml
+qmllint -I "$OMARCHY_PATH/shell" BarWidget.qml Panel.qml Sparkline.qml
 ```
 
-## Suggested repository
+The included self-test mocks remote providers, so it can validate parsing and fallback behaviour without contacting live markets.
 
-```text
-https://github.com/crispsimpcrispy/omarchy-finance
-```
-
-Install after publishing:
+## Install from GitHub
 
 ```bash
 omarchy plugin add https://github.com/crispsimpcrispy/omarchy-finance.git --enable
 omarchy restart shell
 ```
 
-Future updates:
+## Update
 
 ```bash
 omarchy plugin update io.github.crispsimpcrispy.finance --yes
 omarchy restart shell
 ```
 
-## Symbols
+## Controls
 
-Examples:
+- Left-click the top-bar widget: open Finance.
+- Middle-click the top-bar widget: force quote refresh.
+- Click a watchlist card: open its chart/detail screen.
+- Use `+ Add` to browse popular assets or add a custom ticker.
 
-```text
-AAPL       Apple
-TSLA       Tesla
-MSFT       Microsoft
-RR.L       Rolls-Royce Holdings (London)
-BTC-USD    Bitcoin / US dollar
-ETH-USD    Ethereum / US dollar
-```
+## Data notes
 
+This plugin is intended as a convenient personal watchlist, not a trading terminal. Public web/data endpoints can be delayed, rate-limited or changed by their providers. The backend caches quote and history responses and fails gracefully when a source is unavailable.
 
-## v0.1.1
+Nasdaq support is strongest for US-listed shares and ETFs. International symbols can fall back to Yahoo Finance/Stooq when those feeds support the ticker. Crypto uses CoinGecko IDs; common symbols such as BTC, ETH, SOL, XRP, ADA, DOGE and LINK are mapped automatically.
 
-- Added provider fallbacks: Yahoo query1 → Yahoo query2 → Stooq for stocks.
-- Crypto now prefers CoinGecko public simple-price data, then falls back to Yahoo.
-- Old error-only caches are invalidated automatically.
-- Quote rows show the provider used, and failures show a useful error.
-- Added `./backend.sh diagnose` to test providers from the desktop.
+## License
+
+MIT

@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
   "id": "io.github.crispsimpcrispy.finance",
-  "name": "Finance Watchlist",
-  "version": "0.1.1",
+  "name": "Finance",
+  "version": "0.2.0",
   "author": "crispsimpcrispy",
   "license": "MIT",
-  "description": "Track stocks, shares and crypto from the Omarchy top bar.",
+  "description": "A polished Omarchy stocks and crypto watchlist with charts and asset details.",
   "kinds": ["bar-widget"],
   "entryPoints": {
     "barWidget": "BarWidget.qml"
   },
   "barWidget": {
-    "displayName": "Finance Watchlist",
+    "displayName": "Finance",
     "category": "System",
     "allowMultiple": false,
     "defaultSection": "right"

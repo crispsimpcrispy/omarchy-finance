@@ -14,21 +14,10 @@ BarWidget {
   readonly property bool opened: panelLoader.item ? panelLoader.item.opened === true : false
   readonly property bool popoutSwitchClosing: panelLoader.item ? panelLoader.item.popoutSwitchClosing === true : false
 
-  function open(payloadJson) {
-    if (panelLoader.item) panelLoader.item.open(payloadJson || "{}")
-  }
-
-  function close() {
-    if (panelLoader.item) panelLoader.item.close()
-  }
-
-  function toggle(payloadJson) {
-    if (panelLoader.item) panelLoader.item.toggle(payloadJson || "{}")
-  }
-
-  function closeForPopoutSwitch() {
-    if (panelLoader.item) panelLoader.item.closeForPopoutSwitch()
-  }
+  function open(payloadJson) { if (panelLoader.item) panelLoader.item.open(payloadJson || "{}") }
+  function close() { if (panelLoader.item) panelLoader.item.close() }
+  function toggle(payloadJson) { if (panelLoader.item) panelLoader.item.toggle(payloadJson || "{}") }
+  function closeForPopoutSwitch() { if (panelLoader.item) panelLoader.item.closeForPopoutSwitch() }
 
   function injectPanel() {
     if (!panelLoader.item) return
@@ -37,11 +26,14 @@ BarWidget {
     panelLoader.item.hostWidget = root
   }
 
+  function acceptQuotes(newQuotes) {
+    root.quotes = newQuotes || []
+    if (root.quoteIndex >= root.quotes.length) root.quoteIndex = 0
+  }
+
   function refreshQuotes(force) {
     if (quoteProc.running) return
-    quoteProc.command = force
-      ? [root.backendPath, "quotes", "--force"]
-      : [root.backendPath, "quotes"]
+    quoteProc.command = force ? [root.backendPath, "quotes", "--force"] : [root.backendPath, "quotes"]
     quoteProc.running = true
   }
 
@@ -51,6 +43,13 @@ BarWidget {
     return (n >= 0 ? "+" : "") + n.toFixed(1) + "%"
   }
 
+  function displaySymbol(quote) {
+    if (!quote) return "$"
+    var s = String(quote.symbol || "$")
+    if (quote.type === "crypto" && s.endsWith("-USD")) s = s.substring(0, s.length - 4)
+    return s
+  }
+
   function currentQuote() {
     if (!root.quotes || root.quotes.length === 0) return null
     return root.quotes[root.quoteIndex % root.quotes.length]
@@ -58,7 +57,6 @@ BarWidget {
 
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
-
   onBarChanged: injectPanel()
 
   Loader {
@@ -79,8 +77,7 @@ BarWidget {
       if (exitCode !== 0) return
       try {
         var data = JSON.parse(String(quoteOut.text || "{}"))
-        root.quotes = data.quotes || []
-        if (root.quoteIndex >= root.quotes.length) root.quoteIndex = 0
+        root.acceptQuotes(data.quotes || [])
       } catch (e) {}
     }
   }
@@ -108,19 +105,19 @@ BarWidget {
     anchors.fill: parent
     bar: root.bar
     horizontalMargin: 7.5
-
     readonly property var quote: root.currentQuote()
+
     text: {
-      if (root.bar && root.bar.vertical) return "$"
-      if (!quote) return "$"
-      if (quote.error) return quote.symbol || "$"
-      return (quote.symbol || "$") + " " + root.formatPct(quote.changePercent)
+      if (root.bar && root.bar.vertical) return "◆"
+      if (!quote) return "◆ Markets"
+      if (quote.error) return root.displaySymbol(quote) + " —"
+      return root.displaySymbol(quote) + " " + root.formatPct(quote.changePercent)
     }
 
     tooltipText: {
-      if (!quote) return "Finance Watchlist"
-      if (quote.error) return (quote.symbol || "Asset") + " · quote unavailable"
-      return (quote.name || quote.symbol) + " · " + quote.priceFormatted + " · " + root.formatPct(quote.changePercent)
+      if (!quote) return "Finance"
+      if (quote.error) return (quote.name || quote.symbol) + " · quote unavailable"
+      return (quote.name || quote.symbol) + " · " + quote.priceFormatted + " · " + root.formatPct(quote.changePercent) + " · " + (quote.provider || "Market")
     }
 
     onPressed: function(buttonCode) {
