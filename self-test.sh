@@ -13,14 +13,20 @@ cat > "$tmp/bin/curl" <<'MOCK'
 #!/usr/bin/env bash
 url="${@: -1}"
 case "$url" in
-  *AAPL*) price=225; prev=220; symbol=AAPL; instrument=EQUITY ;;
-  *TSLA*) price=330; prev=333; symbol=TSLA; instrument=EQUITY ;;
-  *BTC-USD*) price=115000; prev=112000; symbol=BTC-USD; instrument=CRYPTOCURRENCY ;;
+  *query1.finance.yahoo.com*|*query2.finance.yahoo.com*) exit 22 ;;
+  *api.coingecko.com*)
+    cat <<'JSON'
+{"btc":{"usd":115000,"usd_24h_change":2.6785714286,"last_updated_at":1770000000}}
+JSON
+    ;;
+  *stooq.com*'aapl.us'*)
+    printf 'Symbol,Date,Time,Open,High,Low,Close,Volume,Prev\nAAPL.US,2026-08-24,21:00:00,220,226,219,225,1000000,220\n'
+    ;;
+  *stooq.com*'tsla.us'*)
+    printf 'Symbol,Date,Time,Open,High,Low,Close,Volume,Prev\nTSLA.US,2026-08-24,21:00:00,333,335,328,330,1000000,333\n'
+    ;;
   *) exit 22 ;;
 esac
-cat <<JSON
-{"chart":{"result":[{"meta":{"currency":"USD","symbol":"$symbol","exchangeName":"TEST","instrumentType":"$instrument","regularMarketPrice":$price,"previousClose":$prev,"regularMarketTime":1770000000},"indicators":{"quote":[{"close":[$price]}]}}],"error":null}}
-JSON
 MOCK
 chmod +x "$tmp/bin/curl"
 
@@ -31,8 +37,11 @@ export PATH="$tmp/bin:$PATH"
 mkdir -p "$HOME"
 
 ./backend.sh config | jq -e '.watchlist|length == 3' >/dev/null
-./backend.sh quotes --force | jq -e '.quotes|length == 3' >/dev/null
-./backend.sh quotes | jq -e '.quotes[] | select(.symbol=="AAPL") | .changePercent > 2' >/dev/null
+quotes="$(./backend.sh quotes --force)"
+jq -e '.cacheVersion == 2 and (.quotes|length == 3)' <<<"$quotes" >/dev/null
+jq -e '.quotes[] | select(.symbol=="AAPL") | .provider == "Stooq" and .price == 225' <<<"$quotes" >/dev/null
+jq -e '.quotes[] | select(.symbol=="TSLA") | .provider == "Stooq" and .price == 330' <<<"$quotes" >/dev/null
+jq -e '.quotes[] | select(.symbol=="BTC-USD") | .provider == "CoinGecko" and .price == 115000' <<<"$quotes" >/dev/null
 ./backend.sh add ETH-USD Ethereum crypto >/dev/null
 ./backend.sh config | jq -e '.watchlist[] | select(.symbol=="ETH-USD")' >/dev/null
 ./backend.sh remove ETH-USD >/dev/null
@@ -40,5 +49,7 @@ mkdir -p "$HOME"
 
 echo "manifest: OK"
 echo "backend syntax: OK"
+echo "provider fallback: OK"
+echo "CoinGecko crypto: OK"
+echo "Stooq stock fallback: OK"
 echo "watchlist CRUD: OK"
-echo "quote parsing/cache: OK"

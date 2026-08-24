@@ -376,8 +376,8 @@ Panel {
                 Text {
                   width: parent.width
                   text: assetRow.quote && !assetRow.quote.error
-                    ? ((assetRow.quote.instrumentType || assetRow.assetType).toUpperCase() + " · " + (assetRow.quote.exchange || "Market") + " · " + (assetRow.quote.currency || ""))
-                    : (assetRow.assetType === "crypto" ? "Crypto" : "Stock")
+                    ? ((assetRow.quote.instrumentType || assetRow.assetType).toUpperCase() + " · " + (assetRow.quote.provider || assetRow.quote.exchange || "Market") + " · " + (assetRow.quote.currency || ""))
+                    : ((assetRow.assetType === "crypto" ? "Crypto" : "Stock") + (assetRow.quote && assetRow.quote.error ? " · " + assetRow.quote.error : ""))
                   color: root.mutedText; font.family: root.fontFamily; font.pixelSize: Style.font.caption; elide: Text.ElideRight
                 }
               }
@@ -398,7 +398,7 @@ Panel {
                   horizontalAlignment: Text.AlignRight
                   text: assetRow.quote && !assetRow.quote.error
                     ? (root.formatChange(assetRow.quote.change, assetRow.quote.currency) + "  " + root.formatPct(assetRow.quote.changePercent))
-                    : ""
+                    : (assetRow.quote && assetRow.quote.error ? "Try Refresh" : "")
                   color: assetRow.quote ? root.changeColor(assetRow.quote.changePercent) : root.mutedText
                   font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall; font.bold: true
                 }
@@ -435,7 +435,7 @@ Panel {
             id: footerText
             anchors.fill: parent
             anchors.margins: Style.space(8)
-            text: root.statusMessage || "Prices are for monitoring only. Data comes from an unofficial Yahoo Finance chart endpoint; availability or delay can vary."
+            text: root.statusMessage || "Prices are for monitoring only. Stocks use Yahoo Finance with a Stooq fallback; crypto uses CoinGecko with Yahoo fallback. Availability or delay can vary."
             color: root.statusError ? root.bar.urgent : root.mutedText
             font.family: root.fontFamily; font.pixelSize: Style.font.caption; wrapMode: Text.WordWrap
           }

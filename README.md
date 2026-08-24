@@ -21,7 +21,7 @@ Default watchlist:
 
 ## Data source
 
-v0.1.0 uses Yahoo Finance's undocumented `v8/finance/chart` JSON endpoint. It does not require an API key, which keeps local installation simple, but it is not an official supported API and can change or become unavailable. Data may also be delayed.
+v0.1.1 uses Yahoo Finance's undocumented `v8/finance/chart` JSON endpoint. It does not require an API key, which keeps local installation simple, but it is not an official supported API and can change or become unavailable. Data may also be delayed.
 
 This plugin is intended for personal monitoring only, not order execution or investment decisions.
 
@@ -93,3 +93,12 @@ RR.L       Rolls-Royce Holdings (London)
 BTC-USD    Bitcoin / US dollar
 ETH-USD    Ethereum / US dollar
 ```
+
+
+## v0.1.1
+
+- Added provider fallbacks: Yahoo query1 → Yahoo query2 → Stooq for stocks.
+- Crypto now prefers CoinGecko public simple-price data, then falls back to Yahoo.
+- Old error-only caches are invalidated automatically.
+- Quote rows show the provider used, and failures show a useful error.
+- Added `./backend.sh diagnose` to test providers from the desktop.

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "io.github.crispsimpcrispy.finance",
   "name": "Finance Watchlist",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "crispsimpcrispy",
   "license": "MIT",
   "description": "Track stocks, shares and crypto from the Omarchy top bar.",
